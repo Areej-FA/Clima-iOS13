@@ -19,7 +19,7 @@ struct WeatherManager {
     
     func preformRequst(urlString: String)  {
         if let url = URL(string: urlString){
-            let session = URLSession(configuration: .default)
+            let session = URLSession(configuration: URLSessionConfiguration.default)
             let task = session.dataTask(with: url) { (data, respons, error) in
                 print("handle")
                 if error != nil {
@@ -29,17 +29,32 @@ struct WeatherManager {
                 
                 if let safeData = data {
                     let dataString = String(data: safeData, encoding: .utf8)
-                    print(dataString)
+                    print(dataString!)
                     self.parseJSON(weatherData: safeData)
                 }
             }
+            
             print("preformRequst")
             task.resume()
         }
     }
     
     func parseJSON(weatherData: Data) {
-        
+        let decoder = JSONDecoder()
+        do {
+            let decodedData = try decoder.decode(WeatherData.self, from: weatherData)
+            let id = decodedData.weather[0].id
+            let name = decodedData.name
+            let temp = decodedData.main.temp
+            
+            let weather = WeatherModel(conditionId: id, cityName: name, temperture: temp)
+            print(weather.ConditionName)
+            
+        } catch {
+            print(error)
+        }
     }
+    
+   
     
 }
